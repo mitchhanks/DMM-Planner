@@ -5,6 +5,8 @@ import { simulateSteps } from "./engine/simulator";
 import { StepEditor } from "./components/StepEditor";
 import type { Step } from "./models/step";
 import { clearPlan, loadPlan, savePlan } from "./store/storage";
+import { arrayMove } from "@dnd-kit/sortable";
+import { downloadTextFile, exportPlanToJson, parseImportedPlan } from "./store/planIO";
 
 
 const initialSteps: Step[] = [
@@ -31,6 +33,8 @@ function App() {
   const [steps, setSteps] = useState<Step[]>(loaded?.steps ?? initialSteps);
   const [planName, setPlanName] = useState<string>(loaded?.name ?? "My route");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [importText, setImportText] = useState("");
+  const [ioMessage, setIoMessage] = useState<string | null>(null);
 
 
 
@@ -45,7 +49,7 @@ function App() {
   }, [steps, selectedIndex]);
   const selectedStepPoints = snapshot.stepPoints[selectedIndex] ?? 0;
   const selectedBreakdown = snapshot.stepPointsBreakdown?.[selectedIndex];
-
+  const [showPasteImport, setShowPasteImport] = useState(false);
 
 
   function addStep() {
@@ -117,6 +121,61 @@ function App() {
     });
   }
 
+  function reorderSteps(activeId: string, overId: string) {
+    const selectedId = steps[selectedIndex]?.id;
+
+    setSteps((prev) => {
+      const oldIndex = prev.findIndex(s => s.id === activeId);
+      const newIndex = prev.findIndex(s => s.id === overId);
+      if (oldIndex === -1 || newIndex === -1) return prev;
+
+      const next = arrayMove(prev, oldIndex, newIndex);
+
+      // Keep the previously selected step selected (even if another step was dragged)
+      if (selectedId) {
+        const nextSelectedIndex = next.findIndex(s => s.id === selectedId);
+        if (nextSelectedIndex !== -1) {
+          setSelectedIndex(nextSelectedIndex);
+        }
+      }
+
+      return next;
+    });
+  }
+
+  function handleExport() {
+    const json = exportPlanToJson(planName, steps);
+    const safeName = (planName || "route").replace(/[^a-z0-9-_ ]/gi, "").trim().replace(/\s+/g, "_");
+    downloadTextFile(`dmm_route_${safeName || "route"}.json`, json);
+    setIoMessage("Exported route JSON.");
+  }
+
+  function handleImportFromText() {
+    try {
+      const imported = parseImportedPlan(importText);
+      setPlanName(imported.name || "Imported route");
+      setSteps(imported.steps);
+      setSelectedIndex(0);
+      setIoMessage("Imported route successfully.");
+    } catch (e: any) {
+      setIoMessage(e?.message ?? "Import failed.");
+    }
+  }
+
+  async function handleImportFile(file: File) {
+    try {
+      const text = await file.text();
+      const imported = parseImportedPlan(text);
+      setPlanName(imported.name || "Imported route");
+      setSteps(imported.steps);
+      setSelectedIndex(0);
+      setIoMessage("Imported route successfully.");
+    } catch (e: any) {
+      setIoMessage(e?.message ?? "Import failed.");
+    }
+  }
+
+
   useEffect(() => {
     savePlan({
       version: 1,
@@ -128,6 +187,64 @@ function App() {
   return (
     <div style={{ padding: 16, color: "#eee" }}>
       <h1 className="dmm-heading">Deadman Mode Planner</h1>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
+        <button className="osrs-button" onClick={handleExport}>
+          Export JSON
+        </button>
+
+        <label className="osrs-button" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          Import file
+          <input
+            type="file"
+            accept="application/json"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void handleImportFile(file);
+              e.currentTarget.value = "";
+            }}
+          />
+        </label>
+
+        <button
+          className="osrs-button"
+          onClick={() => {
+            if (showPasteImport) {
+              handleImportFromText();
+              setShowPasteImport(false);
+            } else {
+              setShowPasteImport(true);
+            }
+          }}
+          disabled={showPasteImport && !importText.trim()}
+        >
+          {showPasteImport ? "Import pasted JSON" : "Import from paste"}
+        </button>
+
+        {ioMessage && (
+          <span style={{ color: "var(--text-muted)", fontSize: 13 }}>{ioMessage}</span>
+        )}
+      </div>
+      {showPasteImport && (
+        <textarea
+          value={importText}
+          onChange={(e) => setImportText(e.target.value)}
+          placeholder="Paste exported route JSON here to import…"
+          style={{
+            width: "100%",
+            maxWidth: 900,
+            minHeight: 90,
+            padding: "8px 10px",
+            borderRadius: 8,
+            border: "1px solid var(--border-main)",
+            background: "var(--bg-panel)",
+            color: "var(--text-main)",
+            outline: "none",
+            marginBottom: 14
+          }}
+        />
+      )}
+
       <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
         <input
           value={planName}
@@ -222,6 +339,7 @@ function App() {
             steps={steps}
             selectedIndex={selectedIndex}
             onSelect={setSelectedIndex}
+            onReorder={reorderSteps}
           />
         </div>
 
