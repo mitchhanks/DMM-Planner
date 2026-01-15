@@ -1,0 +1,82 @@
+:root {
+    /* Base colors */
+    --bg-main: #0b0b0b;
+    --bg-panel: #141414;
+    --bg-panel-alt: #1a1a1a;
+
+    --border-main: #3a3a3a;
+
+    /* Text */
+    --text-main: #e6d28a;
+    /* OSRS yellow */
+    --text-muted: #a69c6d;
+    --text-white: #f5f5f5;
+
+    /* DMM / danger */
+    --dmm-red: #c02c2c;
+    --dmm-red-bright: #e14b4b;
+
+    /* Accent */
+    --gold: #ffd700;
+
+    /* Headings */
+    .osrs-heading {
+        color: var(--gold);
+        font-weight: 700;
+        margin: 0 0 12px 0;
+        text-shadow: 0 1px 0 #000;
+    }
+
+    /* DMM Heading */
+    .dmm-heading {
+        color: var(--dmm-red);
+        font-weight: 800;
+        text-shadow: 0 1px 0 #000;
+        letter-spacing: 0.5px;
+    }
+
+    .dmm-info {
+        margin-top: 8px;
+        padding: 6px 10px;
+        border: 1px solid var(--dmm-red);
+        background: #160909;
+        color: var(--dmm-red-bright);
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .osrs-button {
+        background: var(--bg-panel-alt);
+        border: 1px solid var(--border-main);
+        color: var(--text-main);
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .osrs-button:hover {
+        background: #222;
+    }
+
+    .osrs-button-danger {
+        border-color: var(--dmm-red);
+        color: var(--dmm-red-bright);
+    }
+
+    .osrs-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+
+}
+
+html,
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+    margin: 0;
+    font-family: "Verdana", "Arial", sans-serif;
+    font-size: 14px;
+}
