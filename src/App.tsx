@@ -77,6 +77,45 @@ function App() {
     });
   }
 
+  function duplicateSelectedStep() {
+    const stepToCopy = steps[selectedIndex];
+    if (!stepToCopy) return;
+
+    const copy: Step = {
+      ...stepToCopy,
+      id: `step-${Date.now()}`, // unique id
+      name: `${stepToCopy.name} (copy)`,
+      xpGains: stepToCopy.xpGains.map(g => ({ ...g })),
+      events: stepToCopy.events ? { ...stepToCopy.events } : undefined
+    };
+
+    // Insert directly after current step and select it
+    setSteps(prev => {
+      const next = [...prev];
+      next.splice(selectedIndex + 1, 0, copy);
+      return next;
+    });
+    setSelectedIndex(selectedIndex + 1);
+  }
+
+  function moveSelectedStep(direction: -1 | 1) {
+    setSteps((prev) => {
+      const from = selectedIndex;
+      const to = from + direction;
+
+      if (from < 0 || from >= prev.length) return prev;
+      if (to < 0 || to >= prev.length) return prev;
+
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+
+      // keep the moved step selected
+      setSelectedIndex(to);
+
+      return next;
+    });
+  }
 
   useEffect(() => {
     savePlan({
@@ -150,11 +189,32 @@ function App() {
               + Add step
             </button>
             <button
+              onClick={() => moveSelectedStep(-1)}
+              className="osrs-button"
+              disabled={selectedIndex === 0}
+            >
+              ↑ Up
+            </button>
+            <button
+              onClick={() => moveSelectedStep(1)}
+              className="osrs-button"
+              disabled={selectedIndex >= steps.length - 1}
+            >
+              ↓ Down
+            </button>
+            <button
+              onClick={duplicateSelectedStep}
+              className="osrs-button"
+              disabled={steps.length === 0}
+            >
+              Duplicate
+            </button>
+            <button
               onClick={removeSelectedStep}
               className="osrs-button osrs-button-danger"
               disabled={steps.length === 0}
             >
-              Remove step
+              Remove
             </button>
           </div>
 

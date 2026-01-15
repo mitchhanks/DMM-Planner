@@ -6,6 +6,7 @@ export const SKILL_DISPLAY_ORDER = [
   "prayer",
   "magic",
   "hitpoints",
+  "combat",
 
   "agility",
   "herblore",
@@ -25,6 +26,4 @@ export const SKILL_DISPLAY_ORDER = [
   "runecraft",
   "construction",
   "farming",
-
-  "combat"
 ] as const;
