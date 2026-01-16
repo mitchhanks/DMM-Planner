@@ -155,7 +155,7 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                             if (t === "quest_unlock") {
                                 onChange({
                                     ...step,
-                                    unlock: { type: "quest_unlock", unlockId: "", questIds: [] },
+                                    unlock: { type: "quest_unlock", unlockId: "" },
                                 });
                                 return;
                             }
@@ -243,7 +243,6 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                                         unlock: {
                                             type: "quest_unlock",
                                             unlockId,
-                                            questIds: bundle ? [...bundle.questIds] : []
                                         },
                                         manualPointsAdjustment: bundle ? -bundle.pointCost : (step.manualPointsAdjustment ?? 0),
                                     });
@@ -264,14 +263,7 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
 
                                 return (
                                     <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
-                                        Completes quests (no XP awarded via this unlock):
-                                        <ul style={{ margin: "6px 0 0 18px" }}>
-                                            {bundle.questIds.map(id => (
-                                                <li key={id} style={{ marginBottom: 2 }}>
-                                                    {id}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        Selected bundle: <b>{bundle.name}</b> • Cost <b>{bundle.pointCost}</b> points
                                     </div>
                                 );
                             })()}

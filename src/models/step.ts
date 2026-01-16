@@ -11,7 +11,6 @@ export type StepUnlock =
   | {
     type: "quest_unlock";
     unlockId: string;     // id of the bundle/template
-    questIds: string[];   // quests auto-completed
   };
 
 export type Step = {
