@@ -122,24 +122,6 @@ function App() {
     setSelectedIndex(selectedIndex + 1);
   }
 
-  function moveSelectedStep(direction: -1 | 1) {
-    setSteps((prev) => {
-      const from = selectedIndex;
-      const to = from + direction;
-
-      if (from < 0 || from >= prev.length) return prev;
-      if (to < 0 || to >= prev.length) return prev;
-
-      const next = [...prev];
-      const [moved] = next.splice(from, 1);
-      next.splice(to, 0, moved);
-
-      // keep the moved step selected
-      setSelectedIndex(to);
-
-      return next;
-    });
-  }
 
   function reorderSteps(activeId: string, overId: string) {
     const selectedId = steps[selectedIndex]?.id;
@@ -240,10 +222,19 @@ function App() {
         >
           {showPasteImport ? "Import pasted JSON" : "Import from paste"}
         </button>
-
         {ioMessage && (
           <span style={{ color: "var(--text-muted)", fontSize: 13 }}>{ioMessage}</span>
         )}
+        <div style={{ flex: 1 }} />
+        <a
+          href="https://paypal.me/MitchHanksGB"
+          target="_blank"
+          rel="noreferrer"
+          className="donate-link"
+          title="Support development"
+        >
+          ❤ Support
+        </a>
       </div>
       {showPasteImport && (
         <textarea
