@@ -18,58 +18,15 @@
 
     /* Accent */
     --gold: #ffd700;
+}
 
-    /* Headings */
-    .osrs-heading {
-        color: var(--gold);
-        font-weight: 700;
-        margin: 0 0 12px 0;
-        text-shadow: 0 1px 0 #000;
-    }
+/* Prevent horizontal overflow */
+* {
+    box-sizing: border-box;
+}
 
-    /* DMM Heading */
-    .dmm-heading {
-        color: var(--dmm-red);
-        font-weight: 800;
-        text-shadow: 0 1px 0 #000;
-        letter-spacing: 0.5px;
-    }
-
-    .dmm-info {
-        margin-top: 8px;
-        padding: 6px 10px;
-        border: 1px solid var(--dmm-red);
-        background: #160909;
-        color: var(--dmm-red-bright);
-        font-weight: 700;
-        font-size: 13px;
-    }
-
-    .osrs-button {
-        background: var(--bg-panel-alt);
-        border: 1px solid var(--border-main);
-        color: var(--text-main);
-        padding: 8px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .osrs-button:hover {
-        background: #222;
-    }
-
-    .osrs-button-danger {
-        border-color: var(--dmm-red);
-        color: var(--dmm-red-bright);
-    }
-
-    .osrs-button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-
+body {
+    overflow-x: hidden;
 }
 
 html,
@@ -79,4 +36,176 @@ body {
     margin: 0;
     font-family: "Verdana", "Arial", sans-serif;
     font-size: 14px;
+}
+
+/* Headings */
+.osrs-heading {
+    color: var(--gold);
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    text-shadow: 0 1px 0 #000;
+}
+
+/* DMM Heading */
+.dmm-heading {
+    color: var(--dmm-red);
+    font-weight: 800;
+    text-shadow: 0 1px 0 #000;
+    letter-spacing: 0.5px;
+}
+
+.dmm-info {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--dmm-red);
+    background: #160909;
+    color: var(--dmm-red-bright);
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* Buttons */
+.osrs-button {
+    background: var(--bg-panel-alt);
+    border: 1px solid var(--border-main);
+    color: var(--text-main);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.osrs-button:hover {
+    background: #222;
+}
+
+.osrs-button-danger {
+    border-color: var(--dmm-red);
+    color: var(--dmm-red-bright);
+}
+
+.osrs-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Main 3-column layout (middle narrower) */
+.app-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(300px, 420px) minmax(420px, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+/* Important for grid overflow */
+.timeline-col,
+.editor-col {
+    min-width: 0;
+}
+
+/* Responsive: stack columns */
+@media (max-width: 1100px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Scroll areas */
+.timeline-col,
+.editor-col {
+    max-height: calc(100vh - 220px);
+    overflow: hidden;
+}
+
+.timeline-scroll,
+.editor-scroll {
+    max-height: 100%;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* nicer scrollbars (optional) */
+.timeline-scroll::-webkit-scrollbar,
+.editor-scroll::-webkit-scrollbar {
+    width: 10px;
+}
+
+.timeline-scroll::-webkit-scrollbar-thumb,
+.editor-scroll::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+}
+
+/* Step controls row wrapping */
+.step-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+/* This constrains the whole 3-column area to the viewport */
+.app-shell {
+    height: calc(100vh - 230px);
+    /* tweak if your header is taller */
+    min-height: 400px;
+}
+
+/* Make the grid fill that height */
+.app-layout {
+    height: 100%;
+}
+
+/* Allow grid children to shrink (critical for scroll) */
+.app-layout>* {
+    min-height: 0;
+}
+
+/* Make timeline/editor columns be flex containers */
+.timeline-col,
+.editor-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Make the scroll areas actually scroll */
+.timeline-scroll,
+.editor-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Mobile / narrow screens: stack and use normal page scroll */
+@media (max-width: 1100px) {
+    .app-shell {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .app-layout {
+        height: auto !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .app-layout>* {
+        min-height: auto !important;
+    }
+
+    .timeline-col,
+    .editor-col {
+        display: block !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .timeline-scroll,
+    .editor-scroll {
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
 }

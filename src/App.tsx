@@ -292,88 +292,76 @@ function App() {
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-        {/* Left: stats */}
-        <div>
-          <SkillsPanel levels={snapshot.levels} xp={snapshot.xp} />
-          <div style={{ marginTop: 12, color: "#ffd700", fontWeight: 700 }}>
-            Points: {snapshot.points}
-          </div>
-          <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 13 }}>
-            Time: {formatMinutes(minutesToSelected)} to selected • {formatMinutes(totalMinutes)} total
-          </div>
-          <div className="dmm-info">
-            Combat lvl {snapshot.combatLevel} •
-            Combat XP x{snapshot.combatXpMultiplier} •
-            Skilling XP x{snapshot.skillingXpMultiplier} •
-            Drops x{snapshot.dropMultiplier}
-          </div>
-
-        </div>
-
-
-        {/* Middle: timeline */}
-        <div style={{ minWidth: 360 }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-            <button
-              onClick={addStep}
-              className="osrs-button"
-            >
-              + Add step
-            </button>
-            <button
-              onClick={() => moveSelectedStep(-1)}
-              className="osrs-button"
-              disabled={selectedIndex === 0}
-            >
-              ↑ Up
-            </button>
-            <button
-              onClick={() => moveSelectedStep(1)}
-              className="osrs-button"
-              disabled={selectedIndex >= steps.length - 1}
-            >
-              ↓ Down
-            </button>
-            <button
-              onClick={duplicateSelectedStep}
-              className="osrs-button"
-              disabled={steps.length === 0}
-            >
-              Duplicate
-            </button>
-            <button
-              onClick={removeSelectedStep}
-              className="osrs-button osrs-button-danger"
-              disabled={steps.length === 0}
-            >
-              Remove
-            </button>
+      <div className="app-shell">
+        <div className="app-layout">
+          {/* Left: stats */}
+          <div>
+            <SkillsPanel levels={snapshot.levels} xp={snapshot.xp} />
+            <div style={{ marginTop: 12, color: "#ffd700", fontWeight: 700 }}>
+              Points: {snapshot.points}
+            </div>
+            <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 13 }}>
+              Time: {formatMinutes(minutesToSelected)} to selected • {formatMinutes(totalMinutes)} total
+            </div>
+            <div className="dmm-info">
+              Combat lvl {snapshot.combatLevel} •
+              Combat XP x{snapshot.combatXpMultiplier} •
+              Skilling XP x{snapshot.skillingXpMultiplier} •
+              Drops x{snapshot.dropMultiplier}
+            </div>
           </div>
 
-          <StepTimeline
-            steps={steps}
-            selectedIndex={selectedIndex}
-            onSelect={setSelectedIndex}
-            onReorder={reorderSteps}
-          />
-        </div>
+          {/* Middle: timeline */}
+          <div className="timeline-col">
+            <div className="step-controls">
+              <button onClick={addStep} className="osrs-button">
+                + Add step
+              </button>
+              <button
+                onClick={duplicateSelectedStep}
+                className="osrs-button"
+                disabled={steps.length === 0}
+              >
+                Duplicate
+              </button>
+              <button
+                onClick={removeSelectedStep}
+                className="osrs-button osrs-button-danger"
+                disabled={steps.length === 0}
+              >
+                Remove
+              </button>
+            </div>
 
-        {/* Right: editor */}
-        <div style={{ flex: 1, minWidth: 520 }}>
-          {selectedStep ? (
-            <StepEditor
-              step={selectedStep}
-              onChange={updateSelectedStep}
-              computedPoints={selectedStepPoints}
-              breakdown={selectedBreakdown}
-            />
-          ) : (
-            <div style={{ color: "#bbb" }}>Select a step to edit.</div>
-          )}
+            <div className="timeline-scroll">
+              <StepTimeline
+                steps={steps}
+                selectedIndex={selectedIndex}
+                onSelect={setSelectedIndex}
+                onReorder={reorderSteps}
+              />
+            </div>
+          </div>
+
+          {/* Right: editor */}
+          <div className="editor-col">
+            <div className="editor-scroll">
+              {selectedStep ? (
+                <StepEditor
+                  step={selectedStep}
+                  onChange={updateSelectedStep}
+                  computedPoints={selectedStepPoints}
+                  breakdown={selectedBreakdown}
+                />
+              ) : (
+                <div style={{ color: "#bbb" }}>Select a step to edit.</div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
   );
 }
 
