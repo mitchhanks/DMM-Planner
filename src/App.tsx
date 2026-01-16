@@ -50,6 +50,19 @@ function App() {
   const selectedStepPoints = snapshot.stepPoints[selectedIndex] ?? 0;
   const selectedBreakdown = snapshot.stepPointsBreakdown?.[selectedIndex];
   const [showPasteImport, setShowPasteImport] = useState(false);
+  const totalMinutes = useMemo(
+    () => steps.reduce((sum, s) => sum + (s.estimatedMinutes ?? 0), 0),
+    [steps]
+  );
+
+  const minutesToSelected = useMemo(
+    () =>
+      steps
+        .slice(0, selectedIndex + 1)
+        .reduce((sum, s) => sum + (s.estimatedMinutes ?? 0), 0),
+    [steps, selectedIndex]
+  );
+
 
 
   function addStep() {
@@ -286,6 +299,9 @@ function App() {
           <div style={{ marginTop: 12, color: "#ffd700", fontWeight: 700 }}>
             Points: {snapshot.points}
           </div>
+          <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 13 }}>
+            Time: {formatMinutes(minutesToSelected)} to selected • {formatMinutes(totalMinutes)} total
+          </div>
           <div className="dmm-info">
             Combat lvl {snapshot.combatLevel} •
             Combat XP x{snapshot.combatXpMultiplier} •
@@ -359,6 +375,14 @@ function App() {
       </div>
     </div>
   );
+}
+
+function formatMinutes(total: number) {
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  if (h <= 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
 }
 
 export default App;

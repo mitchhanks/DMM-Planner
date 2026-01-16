@@ -201,6 +201,17 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                 This is only for manual tweaks. Auto points come from quests, levels, clues, etc.
             </div>
 
+            <label style={labelStyle}>Estimated time (minutes)</label>
+            <input
+                type="number"
+                min={0}
+                value={step.estimatedMinutes ?? 0}
+                onChange={(e) => {
+                    const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                    onChange({ ...step, estimatedMinutes: n });
+                }}
+                style={inputStyle}
+            />
 
             {/* XP Gains */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>

@@ -19,8 +19,7 @@ export type Step = {
     diaryTasks?: Partial<Record<"easy" | "medium" | "hard" | "elite", number>>; // tasks completed
     bossKills?: Partial<Record<string, number>>; // bossId -> kills in this step
   };
-
+  estimatedMinutes?: number; // per step estimate
   manualPointsAdjustment?: number; // + or - (optional)
-
   notes?: string;
 };
