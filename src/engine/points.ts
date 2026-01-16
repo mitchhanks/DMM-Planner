@@ -124,7 +124,9 @@ export function applyPointsForStep(args: {
   }
 
   // 7) Manual adjustment
-  breakdown.manual += step.manualPointsAdjustment ?? 0;
+  const manual = Number(step.manualPointsAdjustment ?? 0);
+  breakdown.manual += Number.isFinite(manual) ? manual : 0;
+
 
   breakdown.total =
     breakdown.levels +

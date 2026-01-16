@@ -20,9 +20,10 @@ type Props = {
   selectedIndex: number;
   onSelect: (index: number) => void;
   onReorder: (activeId: string, overId: string) => void;
+  pointsTimeline: number[];
 };
 
-export function StepTimeline({ steps, selectedIndex, onSelect, onReorder }: Props) {
+export function StepTimeline({ steps, selectedIndex, onSelect, onReorder, pointsTimeline }: Props) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor)
@@ -50,6 +51,7 @@ export function StepTimeline({ steps, selectedIndex, onSelect, onReorder }: Prop
                 index={idx}
                 selected={idx === selectedIndex}
                 onSelect={() => onSelect(idx)}
+                runningPoints={pointsTimeline[idx] ?? 0}
               />
             ))}
           </div>
@@ -63,12 +65,14 @@ function SortableStepRow({
   step,
   index,
   selected,
-  onSelect
+  onSelect,
+  runningPoints
 }: {
   step: Step;
   index: number;
   selected: boolean;
   onSelect: () => void;
+  runningPoints: number;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({
     id: step.id
@@ -83,6 +87,7 @@ function SortableStepRow({
 
   const qp = step.events?.questPointsGained ?? 0;
   const manual = step.manualPointsAdjustment ?? 0;
+  const isNegative = runningPoints < 0;
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -131,8 +136,17 @@ function SortableStepRow({
             textAlign: "left",
             padding: "10px 12px",
             borderRadius: 8,
-            border: selected ? "2px solid var(--gold)" : "1px solid var(--border-main)",
-            background: selected ? "#2f2a10" : "var(--bg-panel)",
+            border: isNegative
+              ? "2px solid var(--dmm-red-bright)"
+              : selected
+                ? "2px solid var(--gold)"
+                : "1px solid var(--border-main)",
+
+            background: isNegative
+              ? "#1a0b0b"
+              : selected
+                ? "#2f2a10"
+                : "var(--bg-panel)",
             color: "var(--text-main)",
             cursor: "pointer"
           }}

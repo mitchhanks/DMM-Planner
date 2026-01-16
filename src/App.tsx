@@ -7,6 +7,7 @@ import type { Step } from "./models/step";
 import { clearPlan, loadPlan, savePlan } from "./store/storage";
 import { arrayMove } from "@dnd-kit/sortable";
 import { downloadTextFile, exportPlanToJson, parseImportedPlan } from "./store/planIO";
+import { DEFAULT_STARTING_XP } from "./data/startingXp";
 
 
 const initialSteps: Step[] = [
@@ -45,7 +46,7 @@ function App() {
   }
 
   const snapshot = useMemo(() => {
-    return simulateSteps(steps, selectedIndex);
+    return simulateSteps(steps, selectedIndex, DEFAULT_STARTING_XP);
   }, [steps, selectedIndex]);
   const selectedStepPoints = snapshot.stepPoints[selectedIndex] ?? 0;
   const selectedBreakdown = snapshot.stepPointsBreakdown?.[selectedIndex];
@@ -67,14 +68,20 @@ function App() {
 
   function addStep() {
     const next: Step = {
-      id: `step-${steps.length + 1}`,
-      name: `New step ${steps.length + 1}`,
+      id: `step-${Date.now()}`,
+      name: `New step`,
       category: "misc",
-      xpGains: [],
+      xpGains: []
     };
 
-    setSteps((prev) => [...prev, next]);
-    setSelectedIndex(steps.length); // select newly added
+    setSteps(prev => {
+      const insertAt = Math.min(selectedIndex + 1, prev.length);
+      const updated = [...prev];
+      updated.splice(insertAt, 0, next);
+      return updated;
+    });
+
+    setSelectedIndex(prevIndex => Math.min(prevIndex + 1, steps.length));
   }
 
   function removeSelectedStep() {
@@ -339,6 +346,7 @@ function App() {
                 selectedIndex={selectedIndex}
                 onSelect={setSelectedIndex}
                 onReorder={reorderSteps}
+                pointsTimeline={snapshot.pointsTimeline}
               />
             </div>
           </div>

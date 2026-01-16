@@ -1,10 +1,24 @@
 import type { Skill } from "./skills";
 
+export type SigilTier = 1 | 2 | 3;
+
+export type StepUnlock =
+  | {
+    type: "sigil";
+    sigilId: string;
+    tier: SigilTier;
+  }
+  | {
+    type: "quest_unlock";
+    unlockId: string;     // id of the bundle/template
+    questIds: string[];   // quests auto-completed
+  };
+
 export type Step = {
   id: string;
   name: string;
   category: "quest" | "training" | "combat" | "unlock" | "misc";
-
+  unlock?: StepUnlock;
   xpGains: {
     skill: Skill;
     baseXp: number;
