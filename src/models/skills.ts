@@ -6,6 +6,32 @@ export const SKILLS = [
   "runecraft", "construction", "farming"
 ] as const;
 
+export const SKILLS_ALPHA = [
+  "agility",
+  "attack",
+  "construction",
+  "cooking",
+  "crafting",
+  "defence",
+  "farming",
+  "firemaking",
+  "fishing",
+  "fletching",
+  "herblore",
+  "hitpoints",
+  "hunter",
+  "magic",
+  "mining",
+  "prayer",
+  "ranged",
+  "runecraft",
+  "slayer",
+  "smithing",
+  "strength",
+  "thieving",
+  "woodcutting"
+] as const;
+
 export type Skill = typeof SKILLS[number];
 
 export type SkillXpMap = Record<Skill, number>;

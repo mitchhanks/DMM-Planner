@@ -26,8 +26,13 @@ export function SkillsPanel({ levels, xp }: Props) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(4, 64px)",
-        gap: 8
+        gridTemplateRows: "repeat(8, 64px)", // 8 rows
+        gridAutoFlow: "column",
+        gap: 5,
+        fontSize: 12,
+        fontWeight: 700,
+        padding: 4,
+        width: "fit-content"
       }}
     >
       {SKILL_DISPLAY_ORDER.map((key) => {

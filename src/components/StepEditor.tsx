@@ -1,6 +1,6 @@
 import type { Step } from "../models/step";
 import type { Skill } from "../models/skills";
-import { SKILLS } from "../models/skills";
+import { SKILLS_ALPHA } from "../models/skills";
 import { QUESTS } from "../data/quests";
 import { SIGILS, sigilCost } from "../data/sigils";
 import { QUEST_UNLOCKS } from "../data/questUnlocks";
@@ -395,7 +395,7 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                             onChange={(e) => updateXpGain(idx, { skill: e.target.value as Skill })}
                             style={inputStyle}
                         >
-                            {SKILLS.map((s) => (
+                            {SKILLS_ALPHA.map((s) => (
                                 <option key={s} value={s}>
                                     {s}
                                 </option>

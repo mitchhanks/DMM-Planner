@@ -92,7 +92,7 @@ body {
 /* Main 3-column layout (middle narrower) */
 .app-layout {
     display: grid;
-    grid-template-columns: 320px minmax(300px, 420px) minmax(420px, 1fr);
+    grid-template-columns: 250px minmax(300px, 420px) minmax(420px, 1fr);
     gap: 16px;
     align-items: start;
 }

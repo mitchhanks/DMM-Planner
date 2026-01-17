@@ -8,30 +8,12 @@ import { clearPlan, loadPlan, savePlan } from "./store/storage";
 import { arrayMove } from "@dnd-kit/sortable";
 import { downloadTextFile, exportPlanToJson, parseImportedPlan } from "./store/planIO";
 import { DEFAULT_STARTING_XP } from "./data/startingXp";
-
-
-const initialSteps: Step[] = [
-  {
-    id: "step-1",
-    name: "Waterfall Quest",
-    category: "quest",
-    xpGains: [
-      { skill: "attack", baseXp: 13750, source: "Waterfall Quest" },
-      { skill: "strength", baseXp: 13750, source: "Waterfall Quest" }
-    ],
-    events: { questPointsGained: 1 },
-  },
-  {
-    id: "step-2",
-    name: "Train Agility (manual)",
-    category: "training",
-    xpGains: [{ skill: "agility", baseXp: 5000, source: "Gnome course" }],
-  }
-];
+import { DEMO_ROUTE } from "./data/demoRoute";
+import { TutorialPanel } from "./components/TutorialPanel";
 
 function App() {
   const loaded = loadPlan();
-  const [steps, setSteps] = useState<Step[]>(loaded?.steps ?? initialSteps);
+  const [steps, setSteps] = useState<Step[]>(loaded?.steps ?? DEMO_ROUTE);
   const [planName, setPlanName] = useState<string>(loaded?.name ?? "My route");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [importText, setImportText] = useState("");
@@ -274,7 +256,7 @@ function App() {
           onClick={() => {
             clearPlan();
             setPlanName("My route");
-            setSteps(initialSteps);
+            setSteps(DEMO_ROUTE);
             setSelectedIndex(0);
           }}
           style={{
@@ -308,6 +290,7 @@ function App() {
               Drops x{snapshot.dropMultiplier}
             </div>
           </div>
+
 
           {/* Middle: timeline */}
           <div className="timeline-col">
@@ -358,6 +341,9 @@ function App() {
             </div>
           </div>
         </div>
+      </div>
+      <div style={{ marginTop: 22 }}>
+        <TutorialPanel />
       </div>
     </div>
 
