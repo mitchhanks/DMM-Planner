@@ -9,12 +9,6 @@ export type QuestTemplate = {
 
 export const QUESTS: QuestTemplate[] = [
   {
-    id: "daddys_home",
-    name: "Daddy's Home",
-    questPoints: 0,
-    xpGains: [{ skill: "construction", baseXp: 400, source: "Daddy's Home" }]
-  },
-  {
     id: "the_dig_site",
     name: "Dig Site",
     questPoints: 2,
@@ -141,5 +135,17 @@ export const QUESTS: QuestTemplate[] = [
       { skill: "attack", baseXp: 13750, source: "Waterfall Quest" },
       { skill: "strength", baseXp: 13750, source: "Waterfall Quest" }
     ]
+  },
+  {
+    id: "daddys_home",
+    name: "Miniquest Daddy's Home",
+    questPoints: 0,
+    xpGains: [{ skill: "construction", baseXp: 400, source: "Daddy's Home" }]
+  },
+  {
+    id: "museum",
+    name: "Museum Natural history quiz",
+    questPoints: 0,
+    xpGains: [{ skill: "hunter", baseXp: 1000, source: "Museum" }, { skill: "slayer", baseXp: 1000, source: "Museum" }]
   }
 ];

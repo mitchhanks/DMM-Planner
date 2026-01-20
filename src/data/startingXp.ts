@@ -7,4 +7,5 @@ export const DEFAULT_STARTING_XP: SkillXpMap = SKILLS.reduce((acc, skill) => {
 }, {} as SkillXpMap);
 
 // Deadman start: 250 Herblore XP
-DEFAULT_STARTING_XP.herblore = 250;
+DEFAULT_STARTING_XP.herblore = 250; // Level 3
+DEFAULT_STARTING_XP.hitpoints = 1154; // Level 10

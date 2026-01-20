@@ -86,5 +86,6 @@ export const SIGILS: Sigil[] = [
   { id: "rampart", name: "Sigil of rampart", tier: 3 },
   { id: "woodcraft", name: "Sigil of woodcraft", tier: 3 },
   { id: "remote_storage", name: "Sigil of remote storage", tier: 3 },
+  { id: "eternal_belief", name: "Sigil of eternal belief", tier: 3, pointCost: 2000 },
   { id: "ruinous powers", name: "Ruinous powers", tier: 3, pointCost: 3000 },
 ];
