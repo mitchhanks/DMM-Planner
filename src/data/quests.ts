@@ -54,7 +54,10 @@ export const QUESTS: QuestTemplate[] = [
     id: "fight_arena",
     name: "Fight Arena",
     questPoints: 2,
-    xpGains: [{ skill: "attack", baseXp: 12175, source: "Fight Arena" }]
+    xpGains: [
+      { skill: "attack", baseXp: 12175, source: "Fight Arena" },
+      { skill: "thieving", baseXp: 2175, source: "Fight Arena" }
+    ]
   },
   {
     id: "fremennik_trials",
@@ -114,6 +117,15 @@ export const QUESTS: QuestTemplate[] = [
     name: "Murder Mystery",
     questPoints: 3,
     xpGains: [{ skill: "crafting", baseXp: 1406, source: "Murder Mystery" }]
+  },
+  {
+    id: "temple_of_ikov",
+    name: "Temple of Ikov",
+    questPoints: 3,
+    xpGains: [
+      { skill: "ranged", baseXp: 10500, source: "Temple of Ikov" },
+      { skill: "fletching", baseXp: 8000, source: "Temple of Ikov" },
+    ]
   },
   {
     id: "tree_gnome_village",

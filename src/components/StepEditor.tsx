@@ -130,7 +130,7 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
             >
                 <option value="quest">quest</option>
                 <option value="training">training</option>
-                <option value="combat">combat</option>
+                <option value="breach">breach</option>
                 <option value="unlock">unlock</option>
                 <option value="misc">misc</option>
             </select>
@@ -337,6 +337,29 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                     </select>
                 </>
             )}
+
+            {step.category === "breach" && (
+                <>
+                    <label style={labelStyle}>Breach damage (estimate)</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={step.events?.breachDamage ?? 0}
+                        onChange={(e) => {
+                            const dmg = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                            onChange({
+                                ...step,
+                                events: { ...(step.events ?? {}), breachDamage: dmg }
+                            });
+                        }}
+                        style={inputStyle}
+                    />
+                    <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
+                        This is just an estimate. In Run mode, you can edit it to the actual damage dealt.
+                    </div>
+                </>
+            )}
+
 
             {/* Points */}
             <label style={labelStyle}>Manual point adjustment (optional)</label>

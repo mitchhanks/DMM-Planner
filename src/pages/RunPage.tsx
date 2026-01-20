@@ -390,6 +390,34 @@ function RunCard({
                                     {st.estimatedMinutes ? ` • ~${st.estimatedMinutes}m` : ""}
                                 </div>
                             </div>
+                            {st.category === "breach" && (
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={st.events?.breachDamage ?? 0}
+                                    onChange={(e) => {
+                                        const dmg = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                                        onUpdate(s => {
+                                            const nextSteps = s.steps.map((x, i) =>
+                                                i === idx
+                                                    ? { ...x, events: { ...(x.events ?? {}), breachDamage: dmg } }
+                                                    : x
+                                            );
+                                            return { ...s, steps: nextSteps };
+                                        });
+                                    }}
+                                    style={{
+                                        width: 90,
+                                        padding: "6px 8px",
+                                        borderRadius: 6,
+                                        border: "1px solid var(--border-main)",
+                                        background: "var(--bg-panel)",
+                                        color: "var(--text-main)"
+                                    }}
+                                    title="Actual breach damage"
+                                />
+                            )}
+
 
                             {isDone && <span style={{ color: "var(--gold)", fontWeight: 900 }}>✓</span>}
                         </div>

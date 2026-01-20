@@ -16,7 +16,7 @@ export type StepUnlock =
 export type Step = {
   id: string;
   name: string;
-  category: "quest" | "training" | "combat" | "unlock" | "misc";
+  category: "quest" | "training" | "unlock" | "misc" | "breach";
   unlock?: StepUnlock;
   xpGains: {
     skill: Skill;
