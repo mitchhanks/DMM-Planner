@@ -239,7 +239,6 @@ export function RunPage() {
 
 
 const CLUE_TIERS = ["beginner", "easy", "medium", "hard", "elite", "master"] as const;
-type ClueTier = typeof CLUE_TIERS[number];
 
 function calcCluePointsForRun(session: RunSession) {
     const cfg = DEFAULT_POINTS_CONFIG.clues;
@@ -279,11 +278,6 @@ function RunCard({
 }) {
     const { routeName, steps, currentIndex, completed, history } = session;
     const currentStep = steps[currentIndex];
-    const basePointsToCurrent = useMemo(() => {
-        if (!steps.length) return 0;
-        const idx = Math.min(currentIndex, steps.length - 1);
-        return simulateSteps(steps, idx, DEFAULT_STARTING_XP).points;
-    }, [steps, currentIndex]);
     const completedSteps = useMemo(() => {
         return steps.filter(st => !!completed[st.id]);
     }, [steps, completed]);
