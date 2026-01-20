@@ -54,5 +54,3 @@ export const SKILL_ICONS = {
   // Derived (not a real skill)
   combat
 } as const;
-console.log("skillIcons loaded", SKILL_ICONS);
-

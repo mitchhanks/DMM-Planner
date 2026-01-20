@@ -1,27 +1,49 @@
 import type { SkillLevelMap } from "../models/skills";
 import type { Step } from "../models/step";
-import type { PointsConfig } from "../data/pointsConfig";
+import type { ClueTier, PointsConfig } from "../data/pointsConfig";
 
 type PointsState = {
   total: number;
   breachPointsEarned: number;
   bossKillCounts: Record<string, number>;
+  clueFirstClaimed: Partial<Record<ClueTier, boolean>>;
 };
 
 export type PointsBreakdown = {
   levels: number;
-  quests: number;
   clues: number;
   breaches: number;
   diaries: number;
   bosses: number;
+  collectionLogSlots: number;
   manual: number;
   total: number;
 };
 
 export function createInitialPointsState(): PointsState {
-  return { total: 0, breachPointsEarned: 0, bossKillCounts: {} };
+  return { total: 0, breachPointsEarned: 0, bossKillCounts: {}, clueFirstClaimed: {} };
 }
+
+function calculateSkillingPoints(
+  prev: number,
+  next: number,
+  config: PointsConfig["skilling"]
+) {
+  let points = 0;
+
+  for (let lvl = prev + 1; lvl <= next; lvl++) {
+    if (lvl < 50) {
+      points += config.pointsPerLevelBelow50;
+    } else if (lvl <= 98) {
+      points += config.pointsPerLevel50To98;
+    } else if (lvl === 99) {
+      points += config.pointsOn99;
+    }
+  }
+
+  return points;
+}
+
 
 export function applyPointsForStep(args: {
   config: PointsConfig;
@@ -35,47 +57,62 @@ export function applyPointsForStep(args: {
   const stateNext: PointsState = {
     total: args.state.total,
     breachPointsEarned: args.state.breachPointsEarned,
-    bossKillCounts: { ...args.state.bossKillCounts }
+    bossKillCounts: { ...args.state.bossKillCounts },
+    clueFirstClaimed: { ...args.state.clueFirstClaimed }
   };
 
   const breakdown: PointsBreakdown = {
     levels: 0,
-    quests: 0,
     clues: 0,
     breaches: 0,
     diaries: 0,
     bosses: 0,
+    collectionLogSlots: 0,
     manual: 0,
     total: 0
   };
 
-  // 1) Points from level-ups (+99 bonus)
+  // 1) Skilling points (below 50 only + 99 bonus)
   for (const [skill, prevLvl] of Object.entries(prevLevels)) {
     const nextLvl = (nextLevels as any)[skill] as number;
     if (typeof nextLvl !== "number") continue;
 
-    const gained = Math.max(0, nextLvl - prevLvl);
-    if (gained > 0) {
-      breakdown.levels += gained * config.skilling.pointsPerLevel;
-
-      if (prevLvl < 99 && nextLvl >= 99) {
-        breakdown.levels += config.skilling.pointsOn99;
-      }
+    if (nextLvl > prevLvl) {
+      breakdown.levels += calculateSkillingPoints(
+        prevLvl,
+        nextLvl,
+        config.skilling
+      );
     }
   }
 
-  // 2) Quest points
-  const qp = step.events?.questPointsGained ?? 0;
-  if (qp > 0) breakdown.quests += qp * config.quests.pointsPerQuestPoint;
-
-  // 3) Clue caskets
+  // 2) Clue caskets (base values only for now)
   const clues = step.events?.clueCaskets ?? {};
-  for (const [tier, count] of Object.entries(clues)) {
+  const firsts = step.events?.clueFirsts ?? {};
+
+  for (const [tierRaw, count] of Object.entries(clues)) {
+    const tier = tierRaw as ClueTier;
     const n = Number(count) || 0;
-    if (n > 0) breakdown.clues += n * (config.clues as any)[tier];
+    if (n <= 0) continue;
+
+    const base = config.clues.base[tier];
+    let points = n * base;
+
+    const wantsFirst = !!firsts[tier];
+    const alreadyClaimed = !!stateNext.clueFirstClaimed[tier];
+
+    if (wantsFirst && !alreadyClaimed) {
+      // Apply multiplier to ONE casket (cleanest interpretation)
+      // total = (n-1)*base + 1*(base*mult)
+      points = (n - 1) * base + base * config.clues.firstTierMultiplier;
+      stateNext.clueFirstClaimed[tier] = true;
+    }
+
+    breakdown.clues += points;
   }
 
-  // 4) Breach damage (capped)
+
+  // 3) Breach damage (capped)
   const dmg = step.events?.breachDamage ?? 0;
   if (dmg > 0) {
     const pointsPotential = dmg * config.breaches.pointsPerDamage;
@@ -88,6 +125,8 @@ export function applyPointsForStep(args: {
     breakdown.breaches += earned;
     stateNext.breachPointsEarned += earned;
   }
+
+  breakdown.collectionLogSlots += (step.events?.collectionLogSlots ?? 0) * config.collectionLog.pointsPerSlot;
 
   // 5) Diary tasks (base points only for now)
   const diaryTasks = step.events?.diaryTasks ?? {};
@@ -130,7 +169,6 @@ export function applyPointsForStep(args: {
 
   breakdown.total =
     breakdown.levels +
-    breakdown.quests +
     breakdown.clues +
     breakdown.breaches +
     breakdown.diaries +

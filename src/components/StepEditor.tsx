@@ -12,12 +12,12 @@ type Props = {
     onChange: (next: Step) => void;
     computedPoints: number;
     breakdown?: {
-        quests: number;
         levels: number;
         clues: number;
         breaches: number;
         diaries: number;
         bosses: number;
+        collectionLogSlots: number;
         manual: number;
         total: number;
     };
@@ -82,11 +82,11 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                         lineHeight: 1.6
                     }}
                 >
-                    {renderBreakdownLine("Quests", breakdown.quests)}
                     {renderBreakdownLine("Levels", breakdown.levels)}
                     {renderBreakdownLine("Clues", breakdown.clues)}
                     {renderBreakdownLine("Breaches", breakdown.breaches)}
                     {renderBreakdownLine("Diaries", breakdown.diaries)}
+                    {renderBreakdownLine("Collection Log", breakdown.collectionLogSlots)}
                     {renderBreakdownLine("Bosses", breakdown.bosses)}
                     {renderBreakdownLine("Manual", breakdown.manual)}
 
@@ -95,10 +95,10 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                     </div>
 
                     {breakdown.total !== 0 &&
-                        breakdown.quests === 0 &&
                         breakdown.levels === 0 &&
                         breakdown.clues === 0 &&
                         breakdown.breaches === 0 &&
+                        breakdown.collectionLogSlots === 0 &&
                         breakdown.diaries === 0 &&
                         breakdown.bosses === 0 &&
                         breakdown.manual === 0 && (
@@ -275,33 +275,8 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                             Unlock steps only spend points and unlock content. If you want XP from quests, add those quests as normal quest steps.
                         </div>
                     </div>
-                </>
-            )}
 
 
-            {/* Quest points */}
-            {step.category === "quest" && (
-                <>
-                    <label style={labelStyle}>Quest points gained</label>
-                    <input
-                        type="number"
-                        min={0}
-                        value={step.events?.questPointsGained ?? 0}
-                        onChange={(e) => {
-                            const qp = Math.max(0, Math.floor(Number(e.target.value) || 0));
-                            onChange({
-                                ...step,
-                                events: {
-                                    ...(step.events ?? {}),
-                                    questPointsGained: qp
-                                }
-                            });
-                        }}
-                        style={inputStyle}
-                    />
-                    <div style={{ color: "#bbb", fontSize: 12, marginTop: 6 }}>
-                        Points from quests = quest points × points-per-quest-point (configured later).
-                    </div>
                 </>
             )}
 
@@ -322,7 +297,6 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                                 xpGains: q.xpGains.map(g => ({ ...g })),
                                 events: {
                                     ...(step.events ?? {}),
-                                    questPointsGained: q.questPoints
                                 }
                             });
                         }}
@@ -335,6 +309,76 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                             </option>
                         ))}
                     </select>
+                </>
+            )}
+
+            {step.category === "misc" && (
+                <>
+                    {/* Collection log */}
+                    <label style={labelStyle}>Collection log slots achieved (this step)</label>
+                    <input
+                        type="number"
+                        min={0}
+                        value={step.events?.collectionLogSlots ?? 0}
+                        onChange={(e) => {
+                            const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                            onChange({
+                                ...step,
+                                events: {
+                                    ...(step.events ?? {}),
+                                    collectionLogSlots: n
+                                }
+                            });
+                        }}
+                        style={inputStyle}
+                        placeholder="0"
+                    />
+                    <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
+                        Points are awarded per collection log slot.
+                    </div>
+
+                    {/* Achievement diary tasks */}
+                    <label style={labelStyle}>Achievement diary tasks completed (this step)</label>
+
+                    <div
+                        style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                            gap: 8
+                        }}
+                    >
+                        {(["easy", "medium", "hard", "elite"] as const).map((tier) => (
+                            <div key={tier}>
+                                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
+                                    {tier}
+                                </div>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={step.events?.diaryTasks?.[tier] ?? 0}
+                                    onChange={(e) => {
+                                        const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                                        onChange({
+                                            ...step,
+                                            events: {
+                                                ...(step.events ?? {}),
+                                                diaryTasks: {
+                                                    ...(step.events?.diaryTasks ?? {}),
+                                                    [tier]: n
+                                                }
+                                            }
+                                        });
+                                    }}
+                                    style={inputStyle}
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ marginTop: 12, color: "var(--text-muted)", fontSize: 12 }}>
+                        Clues are RNG-heavy, so they’re tracked in <b>Run</b> mode rather than planned here.
+                    </div>
+
                 </>
             )}
 
@@ -372,9 +416,6 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                 }}
                 style={inputStyle}
             />
-            <div style={{ color: "#bbb", fontSize: 12, marginTop: 6 }}>
-                This is only for manual tweaks. Auto points come from quests, levels, clues, etc.
-            </div>
 
             <label style={labelStyle}>Estimated time (minutes)</label>
             <input

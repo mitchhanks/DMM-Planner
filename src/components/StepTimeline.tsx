@@ -85,7 +85,6 @@ function SortableStepRow({
     filter: isDragging ? "brightness(1.05)" : "none"
   };
 
-  const qp = step.events?.questPointsGained ?? 0;
   const manual = step.manualPointsAdjustment ?? 0;
   const isNegative = runningPoints < 0;
 
@@ -157,7 +156,6 @@ function SortableStepRow({
 
           <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
             {step.category.toUpperCase()} • XP gains: {step.xpGains.length}
-            {qp > 0 ? ` • QP +${qp}` : ""}
             {manual !== 0 ? ` • Manual ${manual > 0 ? "+" : ""}${manual}` : ""}
           </div>
         </button>

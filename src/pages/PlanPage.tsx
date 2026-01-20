@@ -18,10 +18,6 @@ export function PlanPage() {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [importText, setImportText] = useState("");
     const [ioMessage, setIoMessage] = useState<string | null>(null);
-
-
-
-
     const selectedStep = steps[selectedIndex];
 
     function updateSelectedStep(next: Step) {

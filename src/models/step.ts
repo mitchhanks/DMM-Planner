@@ -28,7 +28,9 @@ export type Step = {
   events?: {
     questPointsGained?: number; // e.g. +3 QP this step
     clueCaskets?: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", number>>;
+    clueFirsts?: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", boolean>>;
     breachDamage?: number;      // total damage dealt in this step
+    collectionLogSlots?: number;
     diaryTasks?: Partial<Record<"easy" | "medium" | "hard" | "elite", number>>; // tasks completed
     bossKills?: Partial<Record<string, number>>; // bossId -> kills in this step
   };

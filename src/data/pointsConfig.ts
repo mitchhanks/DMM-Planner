@@ -3,73 +3,81 @@ export type DiaryTier = "easy" | "medium" | "hard" | "elite";
 
 export type PointsConfig = {
   skilling: {
-    pointsPerLevel: number;     // e.g. 10
-    pointsOn99: number;         // e.g. 300
+    pointsPerLevelBelow50: number;
+    pointsPerLevel50To98: number;
+    pointsOn99: number;
   };
 
-  quests: {
-    pointsPerQuestPoint: number; // e.g. 25
-  };
 
-  clues: Record<ClueTier, number>;
+  clues: {
+    base: Record<ClueTier, number>;
+    firstTierMultiplier: number;
+  };
 
   breaches: {
-    pointsPerDamage: number;    // e.g. 1
-    capTotalPoints: number;     // e.g. 42000
+    pointsPerDamage: number;
+    capTotalPoints: number;
   };
 
   diaries: {
-    pointsPerTask: Record<DiaryTier, number>; // e.g. easy 10, medium 20...
-    // We can implement tier completion bonus later if you want
+    pointsPerTask: Record<DiaryTier, number>;
   };
 
+  collectionLog: {
+    pointsPerSlot: number;
+  };
+
+  // Bosses intentionally kept, but treated as manual for now
   bosses: {
-    firstKillMultiplier: number; // e.g. 10x
-    normalKillCap: number;       // e.g. first 75 kills
-    postCapMultiplier: number;   // e.g. 0.1 (10%), rounded down
-    table: Record<string, { pointsPerKill: number }>; // placeholder values
+    firstKillMultiplier: number;
+    normalKillCap: number;
+    postCapMultiplier: number;
+    table: Record<string, { pointsPerKill: number }>;
   };
 };
 
-// Placeholder defaults (EDIT LATER when DMM rules update)
 export const DEFAULT_POINTS_CONFIG: PointsConfig = {
   skilling: {
-    pointsPerLevel: 10,
+    pointsPerLevelBelow50: 5,
+    pointsPerLevel50To98: 10,
     pointsOn99: 300
   },
-  quests: {
-    pointsPerQuestPoint: 25
-  },
+
   clues: {
-    beginner: 3,
-    easy: 5,
-    medium: 15,
-    hard: 20,
-    elite: 30,
-    master: 55
+    base: {
+      beginner: 5,
+      easy: 8,
+      medium: 15,
+      hard: 20,
+      elite: 30,
+      master: 55
+    },
+    firstTierMultiplier: 5
   },
+
   breaches: {
     pointsPerDamage: 1,
     capTotalPoints: 42000
   },
+
   diaries: {
     pointsPerTask: {
-      easy: 10,
-      medium: 20,
+      easy: 15,
+      medium: 25,
       hard: 40,
-      elite: 80
+      elite: 60
     }
   },
+
+  collectionLog: {
+    pointsPerSlot: 10
+  },
+
   bosses: {
-    firstKillMultiplier: 10,
-    normalKillCap: 75,
-    postCapMultiplier: 0.1,
-    table: {
-      // Only add bosses you care about for planning; expand later.
-      zulrah: { pointsPerKill: 20 },
-      vorkath: { pointsPerKill: 10 },
-      wintertodt: { pointsPerKill: 20 },
-      barrows: { pointsPerKill: 10 }
-    }
+    // Placeholder only – NOT relied on
+    firstKillMultiplier: 5,
+    normalKillCap: 0,
+    postCapMultiplier: 1,
+    table: {}
   }
 };

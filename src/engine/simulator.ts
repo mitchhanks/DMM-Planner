@@ -7,7 +7,7 @@ import { getDmmRates } from "./dmmRates";
 import { isCombatSkill } from "../data/combatSkills";
 import type { PointsBreakdown } from "./points";
 
-import { DEFAULT_POINTS_CONFIG } from "../data/pointsConfig";
+import { DEFAULT_POINTS_CONFIG, type ClueTier } from "../data/pointsConfig";
 import { applyPointsForStep, createInitialPointsState } from "./points";
 
 export type SimulationResult = {
@@ -21,6 +21,7 @@ export type SimulationResult = {
   stepPoints: number[]; // points gained (net) per step (auto + manual)
   stepPointsBreakdown: PointsBreakdown[];
   pointsTimeline: number[]; // total points after each step index
+  claimedClueFirsts: Partial<Record<ClueTier, boolean>>;
 
 };
 
@@ -88,8 +89,6 @@ export function simulateSteps(
 
   }
 
-
-
   // Final snapshot rates for the selected step
   const finalCombatLevel = calculateCombatLevel({
     attack: levels.attack,
@@ -110,6 +109,7 @@ export function simulateSteps(
     stepPoints,
     stepPointsBreakdown,
     pointsTimeline,
+    claimedClueFirsts: pointsState.clueFirstClaimed,
     combatLevel: finalCombatLevel,
     dropMultiplier: finalRates.dropMultiplier,
     combatXpMultiplier: finalRates.combatXpMultiplier,

@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Step } from "../models/step";
 import { parseImportedPlan } from "../store/planIO";
+import { DEFAULT_POINTS_CONFIG } from "../data/pointsConfig";
+import { simulateSteps } from "../engine/simulator";
+import { DEFAULT_STARTING_XP } from "../data/startingXp";
+
 
 type ToggleHistoryItem = {
     type: "toggle";
@@ -17,6 +21,11 @@ export type RunSession = {
     currentIndex: number;
     completed: Record<string, boolean>;
     history: ToggleHistoryItem[];
+    showClues?: boolean;
+    clues?: {
+        caskets: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", number>>;
+        firstClaimed: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", boolean>>;
+    };
 };
 
 type RunSessionsState = {
@@ -228,6 +237,35 @@ export function RunPage() {
     );
 }
 
+
+const CLUE_TIERS = ["beginner", "easy", "medium", "hard", "elite", "master"] as const;
+type ClueTier = typeof CLUE_TIERS[number];
+
+function calcCluePointsForRun(session: RunSession) {
+    const cfg = DEFAULT_POINTS_CONFIG.clues;
+    const counts = session.clues?.caskets ?? {};
+    const first = session.clues?.firstClaimed ?? {};
+
+    let total = 0;
+
+    for (const tier of CLUE_TIERS) {
+        const n = Number(counts[tier] ?? 0) || 0;
+        if (n <= 0) continue;
+
+        const base = cfg.base[tier];
+        const wantsFirst = !!first[tier];
+
+        // Apply the x5 to ONE casket if first is claimed
+        if (wantsFirst) {
+            total += (n - 1) * base + base * cfg.firstTierMultiplier;
+        } else {
+            total += n * base;
+        }
+    }
+
+    return total;
+}
+
 function RunCard({
     session,
     onUpdate,
@@ -241,6 +279,23 @@ function RunCard({
 }) {
     const { routeName, steps, currentIndex, completed, history } = session;
     const currentStep = steps[currentIndex];
+    const basePointsToCurrent = useMemo(() => {
+        if (!steps.length) return 0;
+        const idx = Math.min(currentIndex, steps.length - 1);
+        return simulateSteps(steps, idx, DEFAULT_STARTING_XP).points;
+    }, [steps, currentIndex]);
+    const completedSteps = useMemo(() => {
+        return steps.filter(st => !!completed[st.id]);
+    }, [steps, completed]);
+
+    const basePointsCompleted = useMemo(() => {
+        if (completedSteps.length === 0) return 0;
+        return simulateSteps(completedSteps, completedSteps.length - 1, DEFAULT_STARTING_XP).points;
+    }, [completedSteps]);
+
+    const cluePoints = useMemo(() => calcCluePointsForRun(session), [session]);
+    const totalPoints = basePointsCompleted + cluePoints;
+
 
     const completedCount = useMemo(() => {
         return steps.reduce((sum, s) => sum + (completed[s.id] ? 1 : 0), 0);
@@ -323,6 +378,28 @@ function RunCard({
                 </div>
             </div>
 
+            <div
+                style={{
+                    marginTop: 8,
+                    padding: "8px 10px",
+                    border: "1px solid var(--border-main)",
+                    borderRadius: 8,
+                    background: "#101010",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 10
+                }}
+            >
+                <div style={{ color: "var(--text-muted)", fontSize: 12 }}>Running points</div>
+                <div style={{ fontWeight: 900, color: "var(--gold)", fontSize: 18 }}>{totalPoints}</div>
+            </div>
+
+            <div style={{ marginTop: 6, color: "var(--text-muted)", fontSize: 12 }}>
+                Route: <b style={{ color: "var(--text-main)" }}>{basePointsCompleted}</b>
+                {" "}• Clues: <b style={{ color: "var(--text-main)" }}>{cluePoints}</b>
+            </div>
+
             <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <button className="osrs-button" onClick={completeCurrent} disabled={!currentStep}>
                     Complete
@@ -337,6 +414,138 @@ function RunCard({
                     Remove
                 </button>
             </div>
+
+            <label
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginTop: 10,
+                    color: "var(--text-muted)",
+                    fontSize: 13,
+                    userSelect: "none"
+                }}
+            >
+                <input
+                    type="checkbox"
+                    checked={!!session.showClues}
+                    onChange={(e) =>
+                        onUpdate((s) => ({
+                            ...s,
+                            showClues: e.target.checked
+                        }))
+                    }
+                />
+                Track clue scrolls
+            </label>
+            {session.showClues && (
+
+                <div
+                    style={{
+                        marginTop: 12,
+                        border: "1px solid var(--border-main)",
+                        borderRadius: 8,
+                        background: "var(--bg-panel-alt)",
+                        padding: 10
+                    }}
+                >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                        <div style={{ fontWeight: 800, color: "var(--gold)" }}>Clues</div>
+                        <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                            Points: <span style={{ color: "var(--text-main)", fontWeight: 800 }}>{calcCluePointsForRun(session)}</span>
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+                        {CLUE_TIERS.map((tier) => {
+                            const count = session.clues?.caskets?.[tier] ?? 0;
+                            const first = !!session.clues?.firstClaimed?.[tier];
+
+                            return (
+                                <div
+                                    key={tier}
+                                    style={{
+                                        display: "grid",
+                                        gridTemplateColumns: "95px 80px 1fr",
+                                        gap: 8,
+                                        alignItems: "center"
+                                    }}
+                                >
+                                    <div style={{ fontSize: 12, color: "var(--text-muted)" }}>{tier}</div>
+
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={count}
+                                        onChange={(e) => {
+                                            const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                                            onUpdate((s) => ({
+                                                ...s,
+                                                clues: {
+                                                    caskets: {
+                                                        ...(s.clues?.caskets ?? {}),
+                                                        [tier]: n
+                                                    },
+                                                    firstClaimed: {
+                                                        ...(s.clues?.firstClaimed ?? {})
+                                                    }
+                                                }
+                                            }));
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            padding: "6px 8px",
+                                            borderRadius: 6,
+                                            border: "1px solid var(--border-main)",
+                                            background: "var(--bg-panel)",
+                                            color: "var(--text-main)",
+                                            outline: "none"
+                                        }}
+                                        title="Caskets opened"
+                                    />
+
+                                    <label
+                                        style={{
+                                            display: "flex",
+                                            gap: 8,
+                                            alignItems: "center",
+                                            color: "var(--text-muted)",
+                                            fontSize: 12,
+                                            userSelect: "none"
+                                        }}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={first}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                onUpdate((s) => ({
+                                                    ...s,
+                                                    clues: {
+                                                        caskets: {
+                                                            ...(s.clues?.caskets ?? {})
+                                                        },
+                                                        firstClaimed: {
+                                                            ...(s.clues?.firstClaimed ?? {}),
+                                                            [tier]: checked
+                                                        }
+                                                    }
+                                                }));
+                                            }}
+                                            title="Apply x5 first-of-tier bonus"
+                                        />
+                                        First (×{DEFAULT_POINTS_CONFIG.clues.firstTierMultiplier})
+                                    </label>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 11 }}>
+                        Tip: tick “First” once per tier to apply the ×{DEFAULT_POINTS_CONFIG.clues.firstTierMultiplier} bonus to 1 casket.
+                    </div>
+                </div>
+            )}
 
             <div style={{ marginTop: 10, color: "var(--text-muted)", fontSize: 12 }}>
                 Current:{" "}

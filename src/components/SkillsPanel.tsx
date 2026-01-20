@@ -3,9 +3,6 @@ import { SKILL_DISPLAY_ORDER } from "../data/skillOrder";
 import { calculateCombatLevel } from "../engine/combat";
 import SkillTile from "./SkillTile";
 
-
-console.log("SkillsPanel loaded");
-
 type Props = {
   levels: Record<string, number>;
   xp: Record<string, number>;
