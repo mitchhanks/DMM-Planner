@@ -23,10 +23,10 @@ export const DEMO_ROUTE: Step[] = [
     },
     {
         id: "demo-3",
-        name: "Buy a Tier 1 sigil",
+        name: "Buy Alchemaniac sigil",
         category: "unlock",
         xpGains: [],
-        unlock: { type: "sigil", tier: 1, sigilId: "mobility" },
+        unlock: { type: "unlock", unlockId: "alchemaniac" },
         manualPointsAdjustment: -100,
         notes:
             "Unlock steps spend points. Sigil costs are applied as a negative manual adjustment. No XP is granted automatically."

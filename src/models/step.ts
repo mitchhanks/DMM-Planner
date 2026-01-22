@@ -1,17 +1,11 @@
 import type { Skill } from "./skills";
 
-export type SigilTier = 1 | 2 | 3;
-
 export type StepUnlock =
   | {
-    type: "sigil";
-    sigilId: string;
-    tier: SigilTier;
-  }
-  | {
-    type: "quest_unlock";
-    unlockId: string;     // id of the bundle/template
+    type: "unlock";
+    unlockId: string;
   };
+
 
 export type Step = {
   id: string;

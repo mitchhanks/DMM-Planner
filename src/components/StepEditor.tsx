@@ -2,9 +2,8 @@ import type { Step } from "../models/step";
 import type { Skill } from "../models/skills";
 import { SKILLS_ALPHA } from "../models/skills";
 import { QUESTS } from "../data/quests";
-import { SIGILS, sigilCost } from "../data/sigils";
-import { QUEST_UNLOCKS } from "../data/questUnlocks";
-import type { SigilTier } from "../models/step";
+import { UNLOCKS, UNLOCK_CATEGORIES, type UnlockCategory } from "../data/sigils"; // or ../data/unlocks if you rename
+import { useEffect, useMemo, useState } from "react";
 
 
 type Props = {
@@ -25,9 +24,17 @@ type Props = {
 
 export function StepEditor({ step, onChange, computedPoints, breakdown }: Props) {
 
-    const sigilUnlock = step.unlock?.type === "sigil" ? step.unlock : undefined;
-    const questUnlock = step.unlock?.type === "quest_unlock" ? step.unlock : undefined;
+    const unlock = step.unlock?.type === "unlock" ? step.unlock : undefined;
 
+    const selectedUnlock = useMemo(() => {
+        return unlock?.unlockId ? UNLOCKS.find(u => u.id === unlock.unlockId) : undefined;
+    }, [unlock?.unlockId]);
+
+    const [unlockCategory, setUnlockCategory] = useState<UnlockCategory>("Permanent");
+
+    useEffect(() => {
+        if (selectedUnlock) setUnlockCategory(selectedUnlock.category);
+    }, [selectedUnlock?.id]);
 
     function update(patch: Partial<Step>) {
         onChange({ ...step, ...patch });
@@ -138,147 +145,55 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
             {/* Unlock options */}
             {step.category === "unlock" && (
                 <>
-                    <label style={labelStyle}>Unlock type</label>
+                    <label style={labelStyle}>Unlock category</label>
                     <select
-                        value={step.unlock?.type ?? ""}
+                        value={unlockCategory}
+                        onChange={(e) => setUnlockCategory(e.target.value as UnlockCategory)}
+                        style={inputStyle}
+                    >
+                        {UNLOCK_CATEGORIES.map((c) => (
+                            <option key={c} value={c}>
+                                {c}
+                            </option>
+                        ))}
+                    </select>
+
+                    <label style={labelStyle}>Unlock</label>
+                    <select
+                        value={unlock?.unlockId ?? ""}
                         onChange={(e) => {
-                            const t = e.target.value;
+                            const unlockId = e.target.value;
+                            const item = UNLOCKS.find(u => u.id === unlockId);
 
-                            if (t === "sigil") {
-                                onChange({
-                                    ...step,
-                                    unlock: { type: "sigil", sigilId: "", tier: 1 },
-                                });
-                                return;
-                            }
-
-                            if (t === "quest_unlock") {
-                                onChange({
-                                    ...step,
-                                    unlock: { type: "quest_unlock", unlockId: "" },
-                                });
-                                return;
-                            }
-
-                            onChange({ ...step, unlock: undefined });
+                            onChange({
+                                ...step,
+                                name: item ? `Unlock ${item.name}` : step.name,
+                                unlock: { type: "unlock", unlockId },
+                                manualPointsAdjustment: item ? -item.pointCost : (step.manualPointsAdjustment ?? 0)
+                            });
                         }}
                         style={inputStyle}
                     >
-                        <option value="">Select…</option>
-                        <option value="sigil">Sigil</option>
-                        <option value="quest_unlock">Quest unlock</option>
+                        <option value="">Select an unlock…</option>
+                        {UNLOCKS
+                            .filter(u => u.category === unlockCategory)
+                            .sort((a, b) => a.pointCost - b.pointCost || a.name.localeCompare(b.name))
+                            .map(u => (
+                                <option key={u.id} value={u.id}>
+                                    {u.name} ({u.pointCost})
+                                </option>
+                            ))}
                     </select>
 
-                    {/* Sigil unlock */}
-                    {sigilUnlock && (
-                        <>
-                            <label style={labelStyle}>Sigil tier</label>
-                            <select
-                                value={sigilUnlock.tier}
-                                onChange={(e) => {
-                                    const tier = Number(e.target.value) as SigilTier;
-                                    onChange({
-                                        ...step,
-                                        unlock: { type: "sigil", tier, sigilId: "" }
-                                    });
-                                }}
-                                style={inputStyle}
-                            >
-                                <option value={1}>Tier 1</option>
-                                <option value={2}>Tier 2</option>
-                                <option value={3}>Tier 3</option>
-                            </select>
-
-                            <label style={labelStyle}>Sigil</label>
-                            <select
-                                value={sigilUnlock.sigilId}
-                                onChange={(e) => {
-                                    const sigilId = e.target.value;
-                                    const sigil = SIGILS.find(s => s.id === sigilId);
-                                    const tier = step.unlock?.type === "sigil" ? step.unlock.tier : 1;
-
-                                    onChange({
-                                        ...step,
-                                        name: sigil ? `Buy ${sigil.name}` : step.name,
-                                        unlock: { type: "sigil", tier, sigilId },
-                                        manualPointsAdjustment: sigil ? -sigilCost(sigil) : (step.manualPointsAdjustment ?? 0),
-                                    });
-                                }}
-                                style={inputStyle}
-                            >
-                                <option value="">Select a sigil…</option>
-                                {SIGILS.filter(s => s.tier === (sigilUnlock?.tier ?? 1)).map(s => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.name} (Cost {sigilCost(s)})
-                                    </option>
-                                ))}
-                            </select>
-
-                            {sigilUnlock?.sigilId && (() => {
-                                const sigil = SIGILS.find(s => s.id === sigilUnlock.sigilId);
-                                if (!sigil) return null;
-                                return (
-                                    <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
-                                        Selected: <b>{sigil.name}</b> • Tier {sigil.tier} • Cost{" "}
-                                        <b>{sigilCost(sigil)}</b> points (auto-applied as a negative manual adjustment)
-                                    </div>
-                                );
-                            })()}
-                        </>
-                    )}
-
-                    {/* Quest unlock */}
-                    {questUnlock && (
-                        <>
-                            <label style={labelStyle}>Quest unlock bundle</label>
-                            <select
-                                value={questUnlock?.unlockId ?? ""}
-                                onChange={(e) => {
-                                    const unlockId = e.target.value;
-                                    const bundle = QUEST_UNLOCKS.find(q => q.id === unlockId);
-
-                                    onChange({
-                                        ...step,
-                                        name: bundle ? bundle.name : step.name,
-                                        unlock: {
-                                            type: "quest_unlock",
-                                            unlockId,
-                                        },
-                                        manualPointsAdjustment: bundle ? -bundle.pointCost : (step.manualPointsAdjustment ?? 0),
-                                    });
-                                }}
-                                style={inputStyle}
-                            >
-                                <option value="">Select a bundle…</option>
-                                {QUEST_UNLOCKS.map(b => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name} (Cost {b.pointCost})
-                                    </option>
-                                ))}
-                            </select>
-
-                            {questUnlock?.unlockId && (() => {
-                                const bundle = QUEST_UNLOCKS.find(q => q.id === questUnlock.unlockId);
-                                if (!bundle) return null;
-
-                                return (
-                                    <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
-                                        Selected bundle: <b>{bundle.name}</b> • Cost <b>{bundle.pointCost}</b> points
-                                    </div>
-                                );
-                            })()}
-                        </>
-                    )}
-
-                    <div style={{ marginTop: 10, padding: "8px 10px", border: "1px solid var(--border-main)", borderRadius: 8, background: "var(--bg-panel)" }}>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                            Unlock steps only spend points and unlock content. If you want XP from quests, add those quests as normal quest steps.
+                    {selectedUnlock && (
+                        <div style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 6 }}>
+                            Selected: <b>{selectedUnlock.name}</b> • {selectedUnlock.category} • Cost{" "}
+                            <b>{selectedUnlock.pointCost}</b> points (auto-applied as a negative manual adjustment)
                         </div>
-                    </div>
-
-
+                    )}
                 </>
             )}
+
 
             {/* Quest template */}
             {step.category === "quest" && (
