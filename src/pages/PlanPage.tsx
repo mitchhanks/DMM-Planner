@@ -253,7 +253,7 @@ export function PlanPage() {
                     onClick={() => {
                         clearPlan();
                         setPlanName("My route");
-                        setSteps(DEMO_ROUTE);
+                        setSteps([]);
                         setSelectedIndex(0);
                     }}
                     style={{

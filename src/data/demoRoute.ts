@@ -3,11 +3,10 @@ import type { Step } from "../models/step";
 export const DEMO_ROUTE: Step[] = [
     {
         id: "demo-1",
-        name: "Waterfall Quest",
+        name: "Monk's Friend",
         category: "quest",
         xpGains: [
-            { skill: "attack", baseXp: 13750, source: "Waterfall Quest" },
-            { skill: "strength", baseXp: 13750, source: "Waterfall Quest" }
+            { skill: "woodcutting", baseXp: 2000, source: "Monk's Friend" },
         ],
         events: { questPointsGained: 1 },
         notes:

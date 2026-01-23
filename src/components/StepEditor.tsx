@@ -125,7 +125,7 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
                 value={step.name}
                 onChange={(e) => update({ name: e.target.value })}
                 style={inputStyle}
-                placeholder="e.g. Waterfall Quest"
+                placeholder="e.g. Fight Arena Quest"
             />
 
             {/* Category */}
