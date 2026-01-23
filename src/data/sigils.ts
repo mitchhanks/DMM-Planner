@@ -1,6 +1,6 @@
-export type UnlockCategory  = "PVP" | "Permanent" | "Toggle" | "Quest lamp";
+export type UnlockCategory = "PVP" | "Permanent" | "Toggle" | "Quest lamp";
 
-export type Unlock  = {
+export type Unlock = {
   id: string;
   name: string;
   category: UnlockCategory;
@@ -37,6 +37,7 @@ export const UNLOCKS: Unlock[] = [
   { id: "alchemaniac", name: "Alchemaniac", pointCost: 100, category: "Permanent" },
   { id: "resistance", name: "Resistance", pointCost: 100, category: "Permanent" },
   { id: "deft_strikes", name: "Deft Strikes", pointCost: 100, category: "Permanent" },
+  { id: "onslaught", name: "Onslaught", pointCost: 150, category: "Permanent" },
   { id: "infernal_chef", name: "Infernal Chef", pointCost: 150, category: "Permanent" },
   { id: "deception", name: "Deception", pointCost: 150, category: "Permanent" },
   { id: "hoarding", name: "Hoarding", pointCost: 250, category: "Permanent" },
@@ -55,10 +56,12 @@ export const UNLOCKS: Unlock[] = [
   { id: "revoked_limitation", name: "Revoked Limitation", pointCost: 1000, category: "Permanent" },
   { id: "meticulousness", name: "Meticulousness", pointCost: 1500, category: "Permanent" },
   { id: "eternal_belief", name: "Eternal Belief", pointCost: 2000, category: "Permanent" },
-  { id: "titan", name: "Titan", pointCost: 3000, category: "Permanent" },
+  { id: "titanium", name: "Titanium", pointCost: 3000, category: "Permanent" },
   { id: "augmented_thrall", name: "Augmented Thrall", pointCost: 5000, category: "Permanent" },
   { id: "conclusion", name: "Conclusion", pointCost: 5000, category: "Permanent" },
   { id: "ruinous_powers", name: "Ruinous Powers", pointCost: 5000, category: "Permanent" },
+
+
 
   // --- Toggle ---
   { id: "enhanced_harvest", name: "Enhanced Harvest", pointCost: 100, category: "Toggle" },

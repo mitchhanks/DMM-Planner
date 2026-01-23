@@ -2,9 +2,24 @@ import type { SkillLevelMap } from "../models/skills";
 import type { Step } from "../models/step";
 import type { ClueTier, PointsConfig } from "../data/pointsConfig";
 
+const START_HOUR_UTC = 17;
+const START_MINUTE_UTC = 0;
+
+const START_MINUTES = START_HOUR_UTC * 60 + START_MINUTE_UTC;
+const MINUTES_PER_DAY = 24 * 60;
+const MINUTES_UNTIL_MIDNIGHT = MINUTES_PER_DAY - START_MINUTES; // 420
+
+function dayIndexFromElapsedMinutes(elapsed: number): number {
+  if (elapsed < MINUTES_UNTIL_MIDNIGHT) return 1;
+  return 2 + Math.floor((elapsed - MINUTES_UNTIL_MIDNIGHT) / MINUTES_PER_DAY);
+}
+
+
 type PointsState = {
   total: number;
   breachPointsEarned: number;
+  breachAllowance: number;     // how many breach points you are allowed to earn right now
+  breachDay: number;           // current day index (1-based)
   bossKillCounts: Record<string, number>;
   clueFirstClaimed: Partial<Record<ClueTier, boolean>>;
 };
@@ -21,7 +36,14 @@ export type PointsBreakdown = {
 };
 
 export function createInitialPointsState(): PointsState {
-  return { total: 0, breachPointsEarned: 0, bossKillCounts: {}, clueFirstClaimed: {} };
+  return {
+    total: 0,
+    breachPointsEarned: 0,
+    breachAllowance: 5000, // start day 1 allowance
+    breachDay: 1,
+    bossKillCounts: {},
+    clueFirstClaimed: {}
+  };
 }
 
 function calculateSkillingPoints(
@@ -51,15 +73,28 @@ export function applyPointsForStep(args: {
   nextLevels: SkillLevelMap;
   step: Step;
   state: PointsState;
+  elapsedMinutes: number;
 }): { state: PointsState; breakdown: PointsBreakdown } {
   const { config, prevLevels, nextLevels, step } = args;
 
   const stateNext: PointsState = {
     total: args.state.total,
     breachPointsEarned: args.state.breachPointsEarned,
+    breachAllowance: args.state.breachAllowance,
+    breachDay: args.state.breachDay,
     bossKillCounts: { ...args.state.bossKillCounts },
     clueFirstClaimed: { ...args.state.clueFirstClaimed }
   };
+
+  const day = step.events?.breachDay ?? stateNext.breachDay;
+
+  // If day increased, add allowance for the skipped days
+  if (day > stateNext.breachDay) {
+    const daysPassed = day - stateNext.breachDay;
+    stateNext.breachAllowance += daysPassed * config.breaches.capPerDay;
+    stateNext.breachDay = day;
+  }
+
 
   const breakdown: PointsBreakdown = {
     levels: 0,
@@ -116,16 +151,28 @@ export function applyPointsForStep(args: {
   const dmg = step.events?.breachDamage ?? 0;
   if (dmg > 0) {
     const pointsPotential = dmg * config.breaches.pointsPerDamage;
-    const remaining = Math.max(
+
+    const remainingOverall = Math.max(
       0,
       config.breaches.capTotalPoints - stateNext.breachPointsEarned
     );
-    const earned = Math.min(pointsPotential, remaining);
+
+    const dayIndex = dayIndexFromElapsedMinutes(args.elapsedMinutes);
+    const allowedByNow = dayIndex * config.breaches.capPerDay;
+
+    const remainingAllowance = Math.max(
+      0,
+      allowedByNow - stateNext.breachPointsEarned
+    );
+
+    const earned = Math.min(pointsPotential, remainingOverall, remainingAllowance);
 
     breakdown.breaches += earned;
     stateNext.breachPointsEarned += earned;
   }
 
+
+  // 4) Collection log slots
   breakdown.collectionLogSlots += (step.events?.collectionLogSlots ?? 0) * config.collectionLog.pointsPerSlot;
 
   // 5) Diary tasks (base points only for now)

@@ -71,16 +71,6 @@ export const QUESTS: QuestTemplate[] = [
     ]
   },
   {
-    id: "the_grand_tree",
-    name: "Grand Tree",
-    questPoints: 5,
-    xpGains: [
-      { skill: "agility", baseXp: 7900, source: "Grand Tree" },
-      { skill: "attack", baseXp: 18400, source: "Grand Tree" },
-      { skill: "magic", baseXp: 2150, source: "Grand Tree" }
-    ]
-  },
-  {
     id: "the_knights_sword",
     name: "Knight's Sword",
     questPoints: 1,
@@ -91,20 +81,6 @@ export const QUESTS: QuestTemplate[] = [
     name: "Monk's Friend",
     questPoints: 1,
     xpGains: [{ skill: "woodcutting", baseXp: 2000, source: "Monk's Friend" }]
-  },
-  {
-    id: "monkey_madness_i",
-    name: "Monkey Madness I",
-    questPoints: 3,
-    xpGains: [
-      // Chosen option: Attack + Defence are the higher 35,000 each
-      { skill: "attack", baseXp: 35000, source: "Monkey Madness I (Daero choice)" },
-      { skill: "defence", baseXp: 35000, source: "Monkey Madness I (Daero choice)" },
-
-      // Other option skills get 20,000 each
-      { skill: "strength", baseXp: 20000, source: "Monkey Madness I (Daero choice)" },
-      { skill: "hitpoints", baseXp: 20000, source: "Monkey Madness I (Daero choice)" }
-    ]
   },
   {
     id: "murder_mystery",
@@ -119,21 +95,6 @@ export const QUESTS: QuestTemplate[] = [
     xpGains: [
       { skill: "ranged", baseXp: 10500, source: "Temple of Ikov" },
       { skill: "fletching", baseXp: 8000, source: "Temple of Ikov" },
-    ]
-  },
-  {
-    id: "tree_gnome_village",
-    name: "Tree Gnome Village",
-    questPoints: 2,
-    xpGains: [{ skill: "attack", baseXp: 11450, source: "Tree Gnome Village" }]
-  },
-  {
-    id: "waterfall_quest",
-    name: "Waterfall Quest",
-    questPoints: 1,
-    xpGains: [
-      { skill: "attack", baseXp: 13750, source: "Waterfall Quest" },
-      { skill: "strength", baseXp: 13750, source: "Waterfall Quest" }
     ]
   },
   {

@@ -35,6 +35,7 @@ export function simulateSteps(
   const stepPoints: number[] = [];
   const stepPointsBreakdown: PointsBreakdown[] = [];
   const pointsTimeline: number[] = [];
+  let elapsedMinutes = 0;
 
   for (const skill of SKILLS) {
     xp[skill] = startingXp?.[skill] ?? 0;
@@ -73,14 +74,18 @@ export function simulateSteps(
       levels[gain.skill] = xpToLevel(xp[gain.skill]);
     }
 
+
     // apply points ONCE (after XP/level updates), and store per-step result
     const result = applyPointsForStep({
       config: DEFAULT_POINTS_CONFIG,
       prevLevels,
       nextLevels: levels,
       step,
-      state: pointsState
+      state: pointsState,
+      elapsedMinutes
     });
+
+    elapsedMinutes += step.estimatedMinutes ?? 0;
 
     pointsState = result.state;
     stepPoints[i] = result.breakdown.total;

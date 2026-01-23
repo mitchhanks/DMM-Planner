@@ -4,7 +4,10 @@ import { parseImportedPlan } from "../store/planIO";
 import { DEFAULT_POINTS_CONFIG } from "../data/pointsConfig";
 import { simulateSteps } from "../engine/simulator";
 import { DEFAULT_STARTING_XP } from "../data/startingXp";
+import { BOSS_POINTS } from "../data/bossPoints";
 
+const BOSS_FIRST_MULT = 5;
+const BOSS_KILL_CAP = 100;
 
 type ToggleHistoryItem = {
     type: "toggle";
@@ -26,6 +29,8 @@ export type RunSession = {
         caskets: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", number>>;
         firstClaimed: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", boolean>>;
     };
+    showBosses?: boolean;
+    bossKills?: Partial<Record<string, number>>;
 };
 
 type RunSessionsState = {
@@ -39,6 +44,28 @@ const LEGACY_KEY = "dmm-planner.runstate.v1";
 function makeId() {
     return `sess-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
+
+function calcBossPointsForRun(session: RunSession) {
+    const kills = session.bossKills ?? {};
+    let total = 0;
+
+    for (const [bossId, countRaw] of Object.entries(kills)) {
+        const count = Math.max(0, Math.floor(Number(countRaw) || 0));
+        if (count <= 0) continue;
+
+        const entry = (BOSS_POINTS as any)[bossId];
+        const base = entry?.points ?? 0;
+        if (base <= 0) continue;
+
+        // first kill x5, kills 2..100 x1, 101+ x0
+        if (count >= 1) total += base * BOSS_FIRST_MULT;
+        const normalKills = Math.min(Math.max(0, count - 1), BOSS_KILL_CAP - 1); // 2..100 => 99 kills max
+        total += normalKills * base;
+    }
+
+    return total;
+}
+
 
 function loadSessions(): RunSession[] {
     // 1) Try new multi-session storage
@@ -288,7 +315,10 @@ function RunCard({
     }, [completedSteps]);
 
     const cluePoints = useMemo(() => calcCluePointsForRun(session), [session]);
-    const totalPoints = basePointsCompleted + cluePoints;
+    const bossPoints = useMemo(() => calcBossPointsForRun(session), [session]);
+    const totalPoints = basePointsCompleted + cluePoints + bossPoints;
+
+
 
 
     const completedCount = useMemo(() => {
@@ -392,6 +422,7 @@ function RunCard({
             <div style={{ marginTop: 6, color: "var(--text-muted)", fontSize: 12 }}>
                 Route: <b style={{ color: "var(--text-main)" }}>{basePointsCompleted}</b>
                 {" "}• Clues: <b style={{ color: "var(--text-main)" }}>{cluePoints}</b>
+                {" "}• Bosses: <b style={{ color: "var(--text-main)" }}>{bossPoints}</b>
             </div>
 
             <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -540,6 +571,106 @@ function RunCard({
                     </div>
                 </div>
             )}
+
+            <label
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginTop: 10,
+                    color: "var(--text-muted)",
+                    fontSize: 13,
+                    userSelect: "none"
+                }}
+            >
+                <input
+                    type="checkbox"
+                    checked={!!session.showBosses}
+                    onChange={(e) =>
+                        onUpdate((s) => ({
+                            ...s,
+                            showBosses: e.target.checked
+                        }))
+                    }
+                />
+                Track bosses
+            </label>
+            {session.showBosses && (
+                <div
+                    style={{
+                        marginTop: 12,
+                        border: "1px solid var(--border-main)",
+                        borderRadius: 8,
+                        background: "var(--bg-panel-alt)",
+                        padding: 10
+                    }}
+                >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
+                        <div style={{ fontWeight: 800, color: "var(--gold)" }}>Bosses</div>
+                        <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                            Points:{" "}
+                            <span style={{ color: "var(--text-main)", fontWeight: 800 }}>
+                                {calcBossPointsForRun(session)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6, maxHeight: 260, overflowY: "auto" }}>
+                        {Object.entries(BOSS_POINTS)
+                            .sort((a, b) => a[1].name.localeCompare(b[1].name))
+                            .map(([bossId, info]) => {
+                                const count = session.bossKills?.[bossId] ?? 0;
+
+                                return (
+                                    <div
+                                        key={bossId}
+                                        style={{
+                                            display: "grid",
+                                            gridTemplateColumns: "1fr 80px",
+                                            gap: 8,
+                                            alignItems: "center"
+                                        }}
+                                    >
+                                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                                            {info.name} <span style={{ color: "var(--text-muted)" }}>({info.points})</span>
+                                        </div>
+
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            value={count}
+                                            onChange={(e) => {
+                                                const n = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                                                onUpdate((s) => ({
+                                                    ...s,
+                                                    bossKills: {
+                                                        ...(s.bossKills ?? {}),
+                                                        [bossId]: n
+                                                    }
+                                                }));
+                                            }}
+                                            style={{
+                                                width: "100%",
+                                                padding: "6px 8px",
+                                                borderRadius: 6,
+                                                border: "1px solid var(--border-main)",
+                                                background: "var(--bg-panel)",
+                                                color: "var(--text-main)",
+                                                outline: "none"
+                                            }}
+                                            title="Kills / clears"
+                                        />
+                                    </div>
+                                );
+                            })}
+                    </div>
+
+                    <div style={{ marginTop: 8, color: "var(--text-muted)", fontSize: 11 }}>
+                        First kill is ×5. Kills 101+ give 0 points.
+                    </div>
+                </div>
+            )}
+
 
             <div style={{ marginTop: 10, color: "var(--text-muted)", fontSize: 12 }}>
                 Current:{" "}

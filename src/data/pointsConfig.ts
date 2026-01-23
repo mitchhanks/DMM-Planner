@@ -16,7 +16,8 @@ export type PointsConfig = {
 
   breaches: {
     pointsPerDamage: number;
-    capTotalPoints: number;
+    capTotalPoints: number;      // 75000
+    capPerDay: number;           // 5000
   };
 
   diaries: {
@@ -57,7 +58,8 @@ export const DEFAULT_POINTS_CONFIG: PointsConfig = {
 
   breaches: {
     pointsPerDamage: 1,
-    capTotalPoints: 42000
+    capTotalPoints: 75000,
+    capPerDay: 5000
   },
 
   diaries: {

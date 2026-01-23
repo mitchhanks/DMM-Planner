@@ -2,9 +2,9 @@ import type { Step } from "../models/step";
 import type { Skill } from "../models/skills";
 import { SKILLS_ALPHA } from "../models/skills";
 import { QUESTS } from "../data/quests";
-import { UNLOCKS, UNLOCK_CATEGORIES, type UnlockCategory } from "../data/sigils"; // or ../data/unlocks if you rename
+import { UNLOCKS, UNLOCK_CATEGORIES, type UnlockCategory } from "../data/sigils";
+import { AUTO_COMPLETED_QUESTS } from "../data/autoCompletedQuests";
 import { useEffect, useMemo, useState } from "react";
-
 
 type Props = {
     step: Step;
@@ -24,8 +24,8 @@ type Props = {
 
 export function StepEditor({ step, onChange, computedPoints, breakdown }: Props) {
 
+    const [showAutoQuestInfo, setShowAutoQuestInfo] = useState(false);
     const unlock = step.unlock?.type === "unlock" ? step.unlock : undefined;
-
     const selectedUnlock = useMemo(() => {
         return unlock?.unlockId ? UNLOCKS.find(u => u.id === unlock.unlockId) : undefined;
     }, [unlock?.unlockId]);
@@ -198,7 +198,64 @@ export function StepEditor({ step, onChange, computedPoints, breakdown }: Props)
             {/* Quest template */}
             {step.category === "quest" && (
                 <>
-                    <label style={labelStyle}>Quest template</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <label style={{ ...labelStyle, marginTop: 10, marginBottom: 6 }}>
+                            Quest template
+                        </label>
+
+                        <span
+                            onMouseEnter={() => setShowAutoQuestInfo(true)}
+                            onMouseLeave={() => setShowAutoQuestInfo(false)}
+                            style={{
+                                width: 18,
+                                height: 18,
+                                borderRadius: 999,
+                                border: "1px solid var(--border-main)",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 12,
+                                color: "var(--text-muted)",
+                                cursor: "help",
+                                userSelect: "none",
+                                position: "relative",
+                                top: 2
+                            }}
+                            title="Auto-completed quests"
+                        >
+                            i
+
+                            {showAutoQuestInfo && (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        left: 22,
+                                        top: -250,
+                                        width: 320,
+                                        maxHeight: 1220,
+                                        overflowY: "auto",
+                                        padding: "10px 12px",
+                                        borderRadius: 8,
+                                        border: "1px solid var(--border-main)",
+                                        background: "var(--bg-panel)",
+                                        color: "var(--text-main)",
+                                        zIndex: 2000,
+                                        boxShadow: "0 10px 26px rgba(0,0,0,0.55)"
+                                    }}
+                                >
+                                    <div style={{ fontWeight: 800, color: "var(--gold)", marginBottom: 8 }}>
+                                        Auto-completed at start
+                                    </div>
+
+                                    <ul style={{ margin: 0, paddingLeft: 18, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                                        {AUTO_COMPLETED_QUESTS.map((q) => (
+                                            <li key={q}>{q}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </span>
+                    </div>
                     <select
                         value=""
                         onChange={(e) => {

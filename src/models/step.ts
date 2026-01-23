@@ -24,6 +24,7 @@ export type Step = {
     clueCaskets?: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", number>>;
     clueFirsts?: Partial<Record<"beginner" | "easy" | "medium" | "hard" | "elite" | "master", boolean>>;
     breachDamage?: number;      // total damage dealt in this step
+    breachDay?: number; // 1,2,3...
     collectionLogSlots?: number;
     diaryTasks?: Partial<Record<"easy" | "medium" | "hard" | "elite", number>>; // tasks completed
     bossKills?: Partial<Record<string, number>>; // bossId -> kills in this step
