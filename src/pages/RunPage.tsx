@@ -5,6 +5,7 @@ import { DEFAULT_POINTS_CONFIG } from "../data/pointsConfig";
 import { simulateSteps } from "../engine/simulator";
 import { DEFAULT_STARTING_XP } from "../data/startingXp";
 import { BOSS_POINTS } from "../data/bossPoints";
+import { renderNotes } from "../utils/renderNotes";
 
 const BOSS_FIRST_MULT = 5;
 const BOSS_KILL_CAP = 100;
@@ -719,11 +720,31 @@ function RunCard({
                                 <div style={{ fontWeight: 700 }}>
                                     {idx + 1}. {st.name}
                                 </div>
+
                                 <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
                                     {st.category.toUpperCase()} • XP gains: {st.xpGains.length}
                                     {st.estimatedMinutes ? ` • ~${st.estimatedMinutes}m` : ""}
                                 </div>
+
+                                {st.notes && (
+                                    <div
+                                        style={{
+                                            marginTop: 6,
+                                            fontSize: 12,
+                                            color: "var(--text-main)",
+                                            whiteSpace: "pre-wrap",
+                                            lineHeight: 1.4,
+                                            opacity: isDone ? 0.75 : 1,
+                                            overflowWrap: "anywhere",
+                                            wordBreak: "break-word"
+                                        }}
+                                    >
+                                        {renderNotes(st.notes)}
+                                    </div>
+                                )}
+
                             </div>
+
                             {st.category === "breach" && (
                                 <input
                                     type="number"
@@ -755,6 +776,8 @@ function RunCard({
 
                             {isDone && <span style={{ color: "var(--gold)", fontWeight: 900 }}>✓</span>}
                         </div>
+
+
                     );
                 })}
             </div>
