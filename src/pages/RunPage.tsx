@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import type { Step } from "../models/step";
 import { parseImportedPlan } from "../store/planIO";
 import { DEFAULT_POINTS_CONFIG } from "../data/pointsConfig";
@@ -319,7 +319,17 @@ function RunCard({
     const bossPoints = useMemo(() => calcBossPointsForRun(session), [session]);
     const totalPoints = basePointsCompleted + cluePoints + bossPoints;
 
-
+    const stepsScrollRef = useRef<HTMLDivElement | null>(null);
+    const currentRowRef = useRef<HTMLDivElement | null>(null);
+    // Scroll to current step when it changes
+    useEffect(() => {
+        // Scroll the current step into view inside the card’s step list
+        currentRowRef.current?.scrollIntoView({
+            block: "nearest",
+            inline: "nearest",
+            behavior: "smooth"
+        });
+    }, [currentIndex, steps.length]);
 
 
     const completedCount = useMemo(() => {
@@ -680,7 +690,15 @@ function RunCard({
                 </span>
             </div>
 
-            <div style={{ marginTop: 10 }}>
+            <div
+                ref={stepsScrollRef}
+                style={{
+                    marginTop: 10,
+                    maxHeight: 520,          // tweak to taste
+                    overflowY: "auto",
+                    paddingRight: 6
+                }}
+            >
                 {steps.map((st, idx) => {
                     const isCurrent = idx === currentIndex;
                     const isDone = !!completed[st.id];
@@ -688,6 +706,7 @@ function RunCard({
                     return (
                         <div
                             key={st.id}
+                            ref={isCurrent ? currentRowRef : null}
                             style={{
                                 display: "flex",
                                 alignItems: "center",
